@@ -6,11 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Roman Translator - AI Voice Studio</title>
     <script>
-      // Production environment shim for process.env
-      window.process = window.process || { env: {} };
-      if (typeof window.process.env === 'undefined') {
-        window.process.env = {};
-      }
+      // Global shim for process.env to prevent crashes in production browsers
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
