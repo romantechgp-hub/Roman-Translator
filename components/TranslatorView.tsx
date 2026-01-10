@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { translateText } from '../services/translationService.ts';
 import { generateSpeech } from '../services/geminiTTS.ts';
-import { TTSConfig, TranslationResult } from '../types.ts';
+import { TTSConfig } from '../types.ts';
 import { SUPPORTED_LANGUAGES } from '../constants.ts';
 import SettingsPanel from './SettingsPanel.tsx';
 import AudioControls from './AudioControls.tsx';
@@ -14,6 +14,7 @@ const TranslatorView: React.FC = () => {
   const [targetLang, setTargetLang] = useState('bn');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [ttsStatus, setTtsStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [base64Audio, setBase64Audio] = useState<string | null>(null);
   const [config, setConfig] = useState<TTSConfig>({
     voiceId: 'Kore',
@@ -24,26 +25,30 @@ const TranslatorView: React.FC = () => {
   const handleTranslate = async () => {
     if (!sourceText.trim()) return;
     setStatus('loading');
+    setErrorMessage('');
     setBase64Audio(null);
     try {
       const result = await translateText(sourceText, sourceLang, targetLang);
       setTranslatedText(result);
       setStatus('success');
-    } catch (error) {
+    } catch (error: any) {
       setStatus('error');
+      setErrorMessage('অনুবাদ করতে সমস্যা হয়েছে।');
     }
   };
 
   const handleGenerateVoice = async () => {
     if (!translatedText.trim()) return;
     setTtsStatus('loading');
+    setErrorMessage('');
     setBase64Audio(null);
     try {
       const audio = await generateSpeech(translatedText, config);
       setBase64Audio(audio);
       setTtsStatus('success');
-    } catch (error) {
+    } catch (error: any) {
       setTtsStatus('error');
+      setErrorMessage(error.message || 'ভয়েস তৈরি করতে ব্যর্থ হয়েছে।');
     }
   };
 
@@ -72,7 +77,7 @@ const TranslatorView: React.FC = () => {
               </select>
             </div>
             <button 
-              onClick={() => setSourceText('')}
+              onClick={() => { setSourceText(''); setTranslatedText(''); setBase64Audio(null); }}
               className="text-slate-400 hover:text-slate-600 text-sm transition-colors bengali"
             >
               মুছুন
@@ -104,7 +109,7 @@ const TranslatorView: React.FC = () => {
           </button>
         </div>
 
-        {/* Swap Button (Desktop) */}
+        {/* Swap Button */}
         <button 
           onClick={swapLanguages}
           className="hidden md:flex absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-slate-200 rounded-full items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm transition-all active:scale-90"
@@ -126,7 +131,7 @@ const TranslatorView: React.FC = () => {
               ))}
             </select>
           </div>
-          <div className={`w-full h-48 p-4 rounded-xl border border-slate-100 bg-slate-50 text-lg overflow-y-auto bengali ${!translatedText && 'flex items-center justify-center italic text-slate-400'}`}>
+          <div className={`w-full h-48 p-4 rounded-xl border border-slate-100 bg-slate-50 text-lg overflow-y-auto custom-scrollbar bengali ${!translatedText && 'flex items-center justify-center italic text-slate-400'}`}>
             {translatedText || "অনুবাদ এখানে দেখা যাবে..."}
           </div>
           <button
@@ -149,6 +154,13 @@ const TranslatorView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm bengali flex items-center gap-3">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {errorMessage}
+        </div>
+      )}
 
       <div className="mt-12 pt-12 border-t border-slate-200">
         <div className="flex items-center gap-3 mb-6">
