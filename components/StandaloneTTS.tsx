@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { generateSpeech } from '../services/geminiTTS';
-import { TTSConfig } from '../types';
-import SettingsPanel from './SettingsPanel';
-import AudioControls from './AudioControls';
+import { generateSpeech } from '../services/geminiTTS.ts';
+import { TTSConfig } from '../types.ts';
+import SettingsPanel from './SettingsPanel.tsx';
+import AudioControls from './AudioControls.tsx';
 
 const StandaloneTTS: React.FC = () => {
   const [text, setText] = useState('');

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import TranslatorView from './components/TranslatorView';
-import StandaloneTTS from './components/StandaloneTTS';
+import TranslatorView from './components/TranslatorView.tsx';
+import StandaloneTTS from './components/StandaloneTTS.tsx';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'translator' | 'tts'>('translator');

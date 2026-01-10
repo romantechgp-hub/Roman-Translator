@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
-import { translateText } from '../services/translationService';
-import { generateSpeech } from '../services/geminiTTS';
-import { TTSConfig, TranslationResult } from '../types';
-import { SUPPORTED_LANGUAGES } from '../constants';
-import SettingsPanel from './SettingsPanel';
-import AudioControls from './AudioControls';
+import { translateText } from '../services/translationService.ts';
+import { generateSpeech } from '../services/geminiTTS.ts';
+import { TTSConfig, TranslationResult } from '../types.ts';
+import { SUPPORTED_LANGUAGES } from '../constants.ts';
+import SettingsPanel from './SettingsPanel.tsx';
+import AudioControls from './AudioControls.tsx';
 
 const TranslatorView: React.FC = () => {
   const [sourceText, setSourceText] = useState('');
