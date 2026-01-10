@@ -1,10 +1,36 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TranslatorView from './components/TranslatorView.tsx';
 import StandaloneTTS from './components/StandaloneTTS.tsx';
 
+// The 'aistudio' global is already defined by the environment.
+// Redeclaring it here causes type mismatch errors.
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'translator' | 'tts'>('translator');
+  const [hasKey, setHasKey] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkKey = async () => {
+      // @ts-ignore - aistudio is injected by the environment
+      if (window.aistudio) {
+        // @ts-ignore
+        const selected = await window.aistudio.hasSelectedApiKey();
+        setHasKey(selected || !!process.env.API_KEY);
+      }
+    };
+    checkKey();
+  }, []);
+
+  const handleOpenKeyDialog = async () => {
+    // @ts-ignore
+    if (window.aistudio) {
+      // @ts-ignore
+      await window.aistudio.openSelectKey();
+      setHasKey(true);
+      window.location.reload(); // Refresh to ensure environment variables are re-injected
+    }
+  };
 
   return (
     <div className="min-h-screen pb-20">
@@ -24,8 +50,13 @@ const App: React.FC = () => {
                 </h1>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2 text-[10px] md:text-xs text-slate-500 font-medium">
                   <span className="bengali">তৈরি করেছেন <span className="text-indigo-600 font-bold">Rimon Mahmud Roman</span></span>
-                  <span className="hidden sm:inline text-slate-300">|</span>
-                  <a href="mailto:romantechgp@gmail.com" className="hover:text-indigo-600 transition-colors">romantechgp@gmail.com</a>
+                  <button 
+                    onClick={handleOpenKeyDialog}
+                    className={`flex items-center gap-1 px-2 py-0.5 rounded ${hasKey ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50 animate-pulse'}`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${hasKey ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                    {hasKey ? 'API সচল' : 'API কী যুক্ত করুন'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -39,9 +70,6 @@ const App: React.FC = () => {
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                <svg className="w-4 h-4 hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5a18.022 18.022 0 01-3.827-5.802M13 15.5c-.832 1.664-2.35 3.5-4.5 4.5M19 5h-2M9 3h2m.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
                 অনুবাদক
               </button>
               <button
@@ -52,9 +80,6 @@ const App: React.FC = () => {
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                <svg className="w-4 h-4 hidden md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                </svg>
                 ভয়েস
               </button>
             </nav>
@@ -65,6 +90,26 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="mt-8">
         <div className="max-w-7xl mx-auto px-4">
+          {!hasKey && (
+            <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.268 17c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <div>
+                  <h4 className="font-bold text-amber-800 bengali">এপিআই কী কনফিগার করা নেই</h4>
+                  <p className="text-sm text-amber-700 bengali">অডিও জেনারেট করার জন্য আপনাকে একটি পেইড এপিআই কী সিলেক্ট করতে হবে।</p>
+                </div>
+              </div>
+              <button 
+                onClick={handleOpenKeyDialog}
+                className="px-6 py-3 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition-colors bengali whitespace-nowrap"
+              >
+                কী সিলেক্ট করুন
+              </button>
+            </div>
+          )}
+
           <div className="text-center mb-12">
             <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight bengali">
               {activeTab === 'translator' ? (
