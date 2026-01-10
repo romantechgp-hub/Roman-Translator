@@ -8,6 +8,7 @@ import AudioControls from './AudioControls.tsx';
 const StandaloneTTS: React.FC = () => {
   const [text, setText] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [base64Audio, setBase64Audio] = useState<string | null>(null);
   const [config, setConfig] = useState<TTSConfig>({
     voiceId: 'Zephyr',
@@ -18,13 +19,15 @@ const StandaloneTTS: React.FC = () => {
   const handleGenerateVoice = async () => {
     if (!text.trim()) return;
     setStatus('loading');
+    setErrorMessage('');
     setBase64Audio(null);
     try {
       const audio = await generateSpeech(text, config);
       setBase64Audio(audio);
       setStatus('success');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setErrorMessage(error.message || 'ভয়েস জেনারেট করার সময় একটি সমস্যা হয়েছে।');
       setStatus('error');
     }
   };
@@ -54,6 +57,12 @@ const StandaloneTTS: React.FC = () => {
           </h4>
           <SettingsPanel config={config} onChange={setConfig} />
         </div>
+
+        {status === 'error' && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm bengali">
+            {errorMessage}
+          </div>
+        )}
 
         <button
           onClick={handleGenerateVoice}
